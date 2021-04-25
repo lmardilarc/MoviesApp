@@ -96,7 +96,7 @@ class MovieListFragment : Fragment(), MoviesListAdapter.OnMovieClickListener {
     }
 
     private fun setupMovieDetailBDObserver(movieId: Int) {
-        movieViewModel.fetchMovieDetailBD(movieId).observe(viewLifecycleOwner, Observer {
+        movieViewModel.fetchMovieDetailDB(movieId).observe(viewLifecycleOwner, Observer {
             when (it) {
                 is Resource.Loading -> {
                     progresBar.visibility = View.VISIBLE

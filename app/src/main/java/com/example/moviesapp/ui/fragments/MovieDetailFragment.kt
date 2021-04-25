@@ -1,14 +1,20 @@
 package com.example.moviesapp.ui.fragments
 
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import com.bumptech.glide.Glide
 import com.example.moviesapp.R
 import com.example.moviesapp.R.color
@@ -19,7 +25,9 @@ import com.example.moviesapp.domain.MovieRepoImpl
 import com.example.moviesapp.ui.viewModel.MovieViewModel
 import com.example.moviesapp.ui.viewModel.MovieVmFactory
 import com.example.moviesapp.vo.Const
+import com.example.moviesapp.vo.Resource
 import kotlinx.android.synthetic.main.fragment_movie_detail.*
+import java.lang.Exception
 
 
 class MovieDetailFragment : Fragment() {
@@ -57,7 +65,6 @@ class MovieDetailFragment : Fragment() {
         setupView(view)
     }
 
-
     private fun setupView(view: View) {
         imgPoster = view.findViewById(R.id.img_poster)
         txtTitle = view.findViewById(R.id.txt_title)
@@ -72,6 +79,9 @@ class MovieDetailFragment : Fragment() {
             checkFavorite()
         }
 
+        txtTrailer.setOnClickListener {
+            showTrailer()
+        }
         Glide.with(requireContext()).load("${Const.posterBase}${movie.posterPath}").centerCrop().placeholder(R.drawable.ic_no_video_recording).into(imgPoster)
         txtTitle.text = movie.title
         txtReleaseDate.text = movie.releaseDate
@@ -87,6 +97,31 @@ class MovieDetailFragment : Fragment() {
         }
     }
 
+    private fun showTrailer() {
+         if (movie.video) {
+            movieViewModel.fetchMovieVideoList(movie.id).observe(viewLifecycleOwner, Observer {
+
+                when (it) {
+                    is Resource.Success -> {
+                        it.data
+                        if (it.data != null && it.data.size > 0) {
+                            try {
+                                watchYoutubeVideo(requireActivity().applicationContext, it.data[0].id)
+                            } catch (e: Exception) {
+                                e.printStackTrace()
+                            }
+
+                        }
+                    }
+                    is Resource.Failure -> {
+                        Toast.makeText(requireContext(), "An error has ocurred ${it.exception}", Toast.LENGTH_LONG).show()
+                    }
+                }
+
+            })
+
+        }
+    }
 
     fun checkFavorite() {
         if (movie.favorite) {
@@ -95,6 +130,19 @@ class MovieDetailFragment : Fragment() {
         } else {
             txtFavorite.setTextColor(requireContext().getColor(color.darker_gray))
             imageView.setColorFilter(ContextCompat.getColor(requireContext(), color.darker_gray), android.graphics.PorterDuff.Mode.SRC_IN)
+        }
+    }
+
+
+    fun watchYoutubeVideo(context: Context, id: String) {
+        val appIntent = Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:$id")).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        val webIntent = Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=$id"))
+        try {
+            context.startActivity(appIntent)
+        } catch (ex: ActivityNotFoundException) {
+
+            context.startActivity(webIntent)
         }
     }
 

@@ -2,6 +2,7 @@ package com.example.moviesapp.domain
 
 import androidx.room.Update
 import com.example.moviesapp.data.model.Movie
+import com.example.moviesapp.data.model.MovieVideosList
 import com.example.moviesapp.data.model.PopularMoviesList
 import com.example.moviesapp.vo.Const
 import retrofit2.http.GET
@@ -15,6 +16,7 @@ interface MovieWebService {
     @GET("{movieId}")
     suspend fun getMovieDetail(@Path("movieId") movieId: Int, @Query("api_key") apiKey: String , @Query("language") lenguage: String = Const.lenguage): Movie
 
-
+    @GET("{movieId}/videos")
+    suspend fun getMovieVideos(@Path("movieId") movieId: Int, @Query("api_key") apiKey: String , @Query("language") lenguage: String = Const.lenguage): MovieVideosList
 
 }

@@ -12,11 +12,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class MovieViewModel(private val moviesRepo: MoviesRepo) : ViewModel() {
+    //TODO implement pagination
+    var popularPage = 1
+    var movie: List<Movie>? = null
 
     val fetchMoviesList = liveData(Dispatchers.IO) {
         emit(Resource.Loading())
         try {
-            emit(moviesRepo.getMoviesList())
+            emit(moviesRepo.getMoviesList(popularPage))
         } catch (e: Exception) {
             emit(Resource.Failure(e))
         }
@@ -26,16 +29,28 @@ class MovieViewModel(private val moviesRepo: MoviesRepo) : ViewModel() {
     fun fetchMovieDetail(movieId: Int) = liveData(Dispatchers.IO) {
         emit(Resource.Loading())
         try {
+
             emit(moviesRepo.getMovieDetail(movieId))
+
+
         } catch (e: Exception) {
             emit(Resource.Failure(e))
         }
     }
 
-    fun fetchMovieDetailBD(movieId: Int) = liveData(Dispatchers.IO) {
+    fun fetchMovieDetailDB(movieId: Int) = liveData(Dispatchers.IO) {
         emit(Resource.Loading())
         try {
             emit(moviesRepo.getMovieDetailDB(movieId))
+        } catch (e: Exception) {
+            emit(Resource.Failure(e))
+        }
+    }
+
+    fun fetchMovieVideoList(movieId: Int) = liveData(Dispatchers.IO) {
+        emit(Resource.Loading())
+        try {
+            emit(moviesRepo.getMovieVideos(movieId))
         } catch (e: Exception) {
             emit(Resource.Failure(e))
         }
